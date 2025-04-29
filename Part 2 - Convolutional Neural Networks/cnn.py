@@ -1,4 +1,3 @@
-import tensorflow as tf
 import keras
 from keras._tf_keras.keras.preprocessing.image import ImageDataGenerator
 
@@ -25,22 +24,20 @@ test_set = test_datagen.flow_from_directory(
             batch_size = 32,
             class_mode = 'binary')
 
-# Initialise the CNN
-cnn = keras.models.Sequential()
+# Initialise the CNN, needs to be done like this as input_shape is not a valid parameter for Conv2D
+cnn = keras.Sequential([
+    keras.Input(shape=(64, 64, 3)),
+    keras.layers.Conv2D(filters=32, kernel_size=3, activation='relu'),
+    keras.layers.MaxPool2D(pool_size=2, strides=2, padding='valid'),
+    keras.layers.Conv2D(filters=32, kernel_size=3, activation='relu'),
+    keras.layers.MaxPool2D(pool_size=2, strides=2, padding='valid'),
+    keras.layers.Flatten(),
+    keras.layers.Dense(units=128, activation='relu'),
+    keras.layers.Dense(units=1, activation='sigmoid'),
+])
 
-# Convolution layer and pooling layer. Filters is features, kernal size is the grid size of features, relu activation, and image size, with 3 channels for RGB
-cnn.add(keras.layers.Conv2D(filters=32, kernal_size=3, activation='relu', input_shape=[64, 64, 3]))
-cnn.add(keras.layers.MaxPool2D(pool_size=2, strides=2, padding='valid'))
+# Compile the CNN
+cnn.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy'])
 
-# Second conv and pool layer, no need for input shape as it has already been connected to the image in first layer
-cnn.add(keras.layers.Conv2D(filters=32, kernal_size=3, activation='relu'))
-cnn.add(keras.layers.MaxPool2D(pool_size=2, strides=2, padding='valid'))
-
-# Flatten the image 
-cnn.add(keras.layers.Flatten())
-
-# Full connection, dense layer from ANN, with a lot more neurons
-cnn.add(keras.layers.Dense(units=128, activation='relu'))
-
-# Binary output layer, same as ANN
-cnn.add(keras.layers.Dense(units=1, activation='sigmoid'))
+# Train the training dataset and evaluate on the test set
+cnn.fit(x = training_set, validation_data = test_set, epochs = 25)

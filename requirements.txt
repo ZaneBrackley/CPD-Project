@@ -3,3 +3,4 @@ pandas
 tensorflow
 notebook
 scikit-learn
+pillow
