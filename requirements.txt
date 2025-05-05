@@ -4,3 +4,4 @@ tensorflow
 notebook
 scikit-learn
 pillow
+matplotlib
